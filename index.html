@@ -6,7 +6,54 @@
     <meta charset="UTF-8">
     <title>Магазин цифровых товаров</title>
     <style>
-        /* Ваши стили остаются без изменений */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f7;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            border-bottom: 1px solid #ccc;
+        }
+        .product-list {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+        }
+        .product {
+            background-color: #fff;
+            border-radius: 10px;
+            width: calc(50% - 20px);
+            margin: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .product img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .product-name {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #000;
+        }
+        .buy-button {
+            background-color: #007aff;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -21,45 +68,39 @@
         <div class="product-name">Цифровой товар 1</div>
         <button class="buy-button" data-product-id="1" data-product-name="Цифровой товар 1" data-price="100">Купить за 100₽</button>
     </div>
+    <div class="product">
+        <img src="https://via.placeholder.com/150" alt="Продукт 2">
+        <div class="product-name">Цифровой товар 2</div>
+        <button class="buy-button" data-product-id="2" data-product-name="Цифровой товар 2" data-price="200">Купить за 200₽</button>
+    </div>
     <!-- Добавьте больше продуктов по аналогии -->
 </div>
 
 <script>
-    // Инициализация MainButton
-    Telegram.WebApp.ready();
-
-    let selectedProduct = null;
-
-    function buyProduct(productId, productName, price) {
-        selectedProduct = {
-            product_id: productId,
-            product_name: productName,
-            price: price
-        };
-
-        Telegram.WebApp.MainButton.setText(`Купить за ${price}₽`);
-        Telegram.WebApp.MainButton.show();
-
-        Telegram.WebApp.MainButton.onClick(function() {
-            Telegram.WebApp.sendData(JSON.stringify(selectedProduct));
-            Telegram.WebApp.MainButton.offClick();
-            Telegram.WebApp.MainButton.hide();
-        });
-    }
-
-    // Добавляем обработчик события на кнопки "Купить"
-    document.querySelectorAll('.buy-button').forEach(button => {
-        button.addEventListener('click', function() {
-            const productId = this.getAttribute('data-product-id');
-            const productName = this.getAttribute('data-product-name');
-            const price = this.getAttribute('data-price');
-            buyProduct(productId, productName, price);
-        });
-    });
-
-    // Отладочный код для проверки доступности Telegram.WebApp
+    // Проверяем доступность Telegram WebApp API
     if (window.Telegram.WebApp) {
         console.log("Telegram WebApp API доступен");
+
+        // Добавляем обработчик события на кнопки "Купить"
+        document.querySelectorAll('.buy-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product-id');
+                const productName = this.getAttribute('data-product-name');
+                const price = this.getAttribute('data-price');
+
+                const data = {
+                    product_id: productId,
+                    product_name: productName,
+                    price: price
+                };
+
+                // Отправляем данные боту
+                Telegram.WebApp.sendData(JSON.stringify(data));
+
+                // Отображаем уведомление пользователю
+                alert(`Вы выбрали: ${productName}. Ожидайте счет на оплату в чате с ботом.`);
+            });
+        });
     } else {
         console.log("Telegram WebApp API недоступен");
         alert("Пожалуйста, откройте это приложение внутри Telegram.");
