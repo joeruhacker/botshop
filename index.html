@@ -6,54 +6,7 @@
     <meta charset="UTF-8">
     <title>Магазин цифровых товаров</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f7;
-            margin: 0;
-            padding: 0;
-        }
-        .header {
-            background-color: #fff;
-            padding: 15px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #000;
-            border-bottom: 1px solid #ccc;
-        }
-        .product-list {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 10px;
-        }
-        .product {
-            background-color: #fff;
-            border-radius: 10px;
-            width: calc(50% - 20px);
-            margin: 10px;
-            padding: 15px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-        .product img {
-            width: 100%;
-            border-radius: 10px;
-        }
-        .product-name {
-            font-size: 18px;
-            margin: 10px 0;
-            color: #000;
-        }
-        .buy-button {
-            background-color: #007aff;
-            color: #fff;
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-        }
+        /* Ваши стили остаются без изменений */
     </style>
 </head>
 <body>
@@ -64,7 +17,7 @@
 
 <div class="product-list">
     <div class="product">
-        <img src="https://via.placeholder.com/150" alt="Продукт 1">
+        <img src="https://i.pinimg.com/564x/5b/6e/79/5b6e79ce455e3067e1f1af2784c79f99.jpg" alt="Продукт 1">
         <div class="product-name">Цифровой товар 1</div>
         <button class="buy-button" onclick="buyProduct(1, 'Цифровой товар 1', 100)">Купить за 100₽</button>
     </div>
@@ -73,16 +26,14 @@
 
 <script>
     function buyProduct(productId, productName, price) {
-        // Проверяем, что WebApp доступно
         if (window.Telegram.WebApp) {
-            const invoice = {
-                title: productName,
-                description: "Описание " + productName,
-                currency: "RUB",
-                prices: [{ label: productName, amount: price * 100 }],
-                payload: "payload_" + productId
+            const data = {
+                product_id: productId,
+                product_name: productName,
+                price: price
             };
-            Telegram.WebApp.openInvoice(invoice);
+            // Отправляем данные боту
+            Telegram.WebApp.sendData(JSON.stringify(data));
         } else {
             alert("Telegram WebApp не доступен.");
         }
