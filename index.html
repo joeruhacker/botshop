@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Магазин карт</title>
+    <style>
+        /* CSS */
+        body { font-family: Arial, sans-serif; }
+        .container { width: 300px; margin: 50px auto; text-align: center; }
+        select, input { width: 100%; margin: 10px 0; }
+        button { padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Выберите товар</h1>
+        <select id="productSelect">
+            <option value="">-- Выберите --</option>
+        </select>
+        <div id="priceDisplay"></div>
+        <input type="email" id="emailInput" placeholder="Ваш email">
+        <button id="buyButton" disabled>Купить</button>
+    </div>
+
+    <script>
+        // JS
+        const products = [];
+
+        // Получение данных из Google Таблиц
+        fetch('https://sheets.googleapis.com/v4/spreadsheets/AIzaSyBGRyt-GzDqVjaxppkEr1bL-LhAUdwbtPw/values/Sheet1!A2:C?key=15ZORf6BpuO0aX8lMnWthdVTsh3-FT8sBt55RNMQiB6I')
+            .then(response => response.json())
+            .then(data => {
+                data.values.forEach(row => {
+                    products.push({ name: row[0], price: row[1], available: row[2] });
+                    let option = document.createElement('option');
+                    option.value = row[0];
+                    option.text = row[0];
+                    document.getElementById('productSelect').add(option);
+                });
+            });
+
+        document.getElementById('productSelect').addEventListener('change', function() {
+            const product = products.find(p => p.name === this.value);
+            if (product && product.available > 0) {
+                document.getElementById('priceDisplay').innerText = `Цена: ${product.price}₽`;
+                document.getElementById('buyButton').disabled = false;
+            } else {
+                document.getElementById('priceDisplay').innerText = 'Товара нет в наличии';
+                document.getElementById('buyButton').disabled = true;
+            }
+        });
+
+        document.getElementById('buyButton').addEventListener('click', function() {
+            const email = document.getElementById('emailInput').value;
+            const product = products.find(p => p.name === document.getElementById('productSelect').value);
+            if (email && product) {
+                // Перенаправление на оплату в Тинькофф
+                window.location.href = `https://www.tinkoff.ru/pay?amount=${product.price}&email=${email}&description=${product.name}`;
+            } else {
+                alert('Пожалуйста, заполните все поля.');
+            }
+        });
+    </script>
+</body>
+</html>
