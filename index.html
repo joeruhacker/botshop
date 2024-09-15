@@ -1,128 +1,93 @@
-<!-- miniapp.html -->
+<!-- index.html -->
 
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Магазин карт</title>
+    <title>Магазин цифровых товаров</title>
     <style>
-        /* CSS */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f2f2f7;
+            margin: 0;
+            padding: 0;
         }
-        .container {
-            max-width: 400px;
-            margin: 50px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
+        .header {
+            background-color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            border-bottom: 1px solid #ccc;
         }
-        h1 {
+        .product-list {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+        }
+        .product {
+            background-color: #fff;
+            border-radius: 10px;
+            width: calc(50% - 20px);
+            margin: 10px;
+            padding: 15px;
+            box-sizing: border-box;
             text-align: center;
         }
-        select, input {
+        .product img {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+            border-radius: 10px;
         }
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-        }
-        #priceDisplay {
+        .product-name {
             font-size: 18px;
             margin: 10px 0;
+            color: #000;
+        }
+        .buy-button {
+            background-color: #007aff;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Выберите товар</h1>
-        <select id="productSelect">
-            <option value="">-- Выберите товар --</option>
-        </select>
-        <div id="priceDisplay"></div>
-        <input type="email" id="emailInput" placeholder="Ваш email" required>
-        <button id="buyButton" disabled>Купить</button>
+
+<div class="header">
+    Магазин
+</div>
+
+<div class="product-list">
+    <div class="product">
+        <img src="https://via.placeholder.com/150" alt="Продукт 1">
+        <div class="product-name">Цифровой товар 1</div>
+        <button class="buy-button" onclick="buyProduct(1, 'Цифровой товар 1', 100)">Купить за 100₽</button>
     </div>
+    <!-- Добавьте больше продуктов по аналогии -->
+</div>
 
-    <script>
-        // JavaScript
+<script>
+    function buyProduct(productId, productName, price) {
+        // Проверяем, что WebApp доступно
+        if (window.Telegram.WebApp) {
+            const invoice = {
+                title: productName,
+                description: "Описание " + productName,
+                currency: "RUB",
+                prices: [{ label: productName, amount: price * 100 }],
+                payload: "payload_" + productId
+            };
+            Telegram.WebApp.openInvoice(invoice);
+        } else {
+            alert("Telegram WebApp не доступен.");
+        }
+    }
+</script>
 
-        // Ваш API ключ Google Sheets
-        const GOOGLE_API_KEY = 'AIzaSyBGRyt-GzDqVjaxppkEr1bL-LhAUdwbtPw';
-        // ID вашей Google Таблицы
-        const SHEET_ID = '15ZORf6BpuO0aX8lMnWthdVTsh3-FT8sBt55RNMQiB6';
-
-        let products = [];
-
-        // Получение данных из Google Таблиц
-        fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A2:C?key=${GOOGLE_API_KEY}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.values) {
-                    data.values.forEach(row => {
-                        const [name, price, availability] = row;
-                        products.push({ name, price, available: parseInt(availability) });
-                        let option = document.createElement('option');
-                        option.value = name;
-                        option.text = name;
-                        document.getElementById('productSelect').add(option);
-                    });
-                } else {
-                    alert('Ошибка при загрузке данных товаров.');
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при получении данных из Google Sheets:', error);
-                alert('Не удалось загрузить товары.');
-            });
-
-        document.getElementById('productSelect').addEventListener('change', function() {
-            const product = products.find(p => p.name === this.value);
-            if (product && product.available > 0) {
-                document.getElementById('priceDisplay').innerText = `Цена: ${product.price}₽`;
-                document.getElementById('buyButton').disabled = false;
-            } else {
-                document.getElementById('priceDisplay').innerText = 'Товара нет в наличии';
-                document.getElementById('buyButton').disabled = true;
-            }
-        });
-
-        document.getElementById('buyButton').addEventListener('click', function() {
-            const email = document.getElementById('emailInput').value;
-            const product = products.find(p => p.name === document.getElementById('productSelect').value);
-            if (email && product) {
-                // Отправка данных на сервер для создания платежа
-                fetch('https://yourdomain.com/create_payment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        amount: product.price,
-                        description: product.name,
-                        email: email
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.PaymentURL) {
-                        window.location.href = data.PaymentURL;
-                    } else {
-                        alert('Ошибка при создании платежа.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    alert('Ошибка при соединении с сервером.');
-                });
-            } else {
-                alert('Пожалуйста, заполните все поля.');
-            }
-        });
-    </script>
 </body>
 </html>
